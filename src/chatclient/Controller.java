@@ -35,6 +35,8 @@ public class Controller {
     private AnchorPane rightPane;
     @FXML
     private TextArea chatArea;
+    @FXML
+    private TextArea usersArea;
 
     public void initialize() {
 
@@ -63,15 +65,14 @@ public class Controller {
                 socket = new Socket(SERVER_HOST, SERVER_PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 
-                JSONObject msgName = new JSONObject();
-                msgName.put("name", nameField.getText());
-                writer.println(msgName.toString());
-
-                receiveThread = new ReceiveThread(socket, chatArea);
+                receiveThread = new ReceiveThread(socket, chatArea, usersArea);
                 receiveThread.start();
+                
+                Send(nameField.getText() + " si è connesso");
 
                 connectButton.setText("Disconnetti");
                 clearButton.setDisable(false);
+                usersArea.setDisable(false);
                 rightPane.setDisable(false);
                 nameField.setDisable(true);
                 
@@ -84,6 +85,8 @@ public class Controller {
                 clearButton.setDisable(true);
                 rightPane.setDisable(true);
                 nameField.setDisable(false);
+                usersArea.setDisable(true);
+                usersArea.setText("");
                 inputField.setText("");
                 chatArea.setText("");
             }
@@ -97,16 +100,22 @@ public class Controller {
         chatArea.setText("");
     }
     
-    public void Send(KeyEvent ke) {
+    public void CheckSend(KeyEvent ke) {
         if (ke.getCode().equals(KeyCode.ENTER)) {
-            JSONObject msg = new JSONObject();
-            msg.put("name", nameField.getText());
-            msg.put("value", inputField.getText());
-            msg.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-            JSONArray msgs = new JSONArray();
-            msgs.put(msg);
-            writer.println(msgs.toString());
+            Send(inputField.getText());
             inputField.setText("");
         }
+    }
+    
+    public void Send(String string) {
+        JSONObject msg = new JSONObject();
+        msg.put("name", nameField.getText());
+        msg.put("value", string);
+        msg.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+        JSONArray msgs = new JSONArray();
+        msgs.put(msg);
+        JSONObject obj = new JSONObject();
+        obj.put("messages", msgs);
+        writer.println(obj.toString());
     }
 }

@@ -2,8 +2,6 @@ package chatclient;
 
 import java.io.*;
 import java.net.Socket;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -15,6 +13,7 @@ public class ReceiveThread extends Thread {
     Socket socket = null;
     boolean close = false;
     TextArea chatArea;
+    TextArea usersArea;
     
     public class MessageJson {
         private String msgJson;
@@ -22,9 +21,10 @@ public class ReceiveThread extends Thread {
         public synchronized String getMsgJson() {return msgJson;}
     }
     
-    public ReceiveThread(Socket s, TextArea chat) {
+    public ReceiveThread(Socket s, TextArea chat, TextArea users) {
         socket = s;
         chatArea = chat;
+        usersArea = users;
     }
     
     public void Close() {
@@ -42,9 +42,12 @@ public class ReceiveThread extends Thread {
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
                         String chatText = chatArea.getText();
-                        
                         String json = msgJson.getMsgJson();
-                        JSONArray arr = new JSONArray(json);
+                        
+                        System.out.println(json);
+                        JSONObject obj = new JSONObject(json);
+                        
+                        JSONArray arr = obj.optJSONArray("messages", new JSONArray());
                         for(int i=0; i<arr.length(); i++) {
                             JSONObject msg = arr.getJSONObject(i);
                             chatText = msg.getString("date")
@@ -52,8 +55,15 @@ public class ReceiveThread extends Thread {
                                     + ": \t" + msg.getString("value")  + "\n"
                                     + chatText;
                         }
-                        
                         chatArea.setText(chatText);
+                        
+                        String usersString = "";
+                        JSONArray clients = obj.optJSONArray("users", new JSONArray());
+                        for(int i=0; i<clients.length(); i++) {
+                            JSONObject msg = clients.getJSONObject(i);
+                            usersString += msg.getString("name") + "\n";
+                        }
+                        usersArea.setText(usersString);
                     }
                 });
             }
