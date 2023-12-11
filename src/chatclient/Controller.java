@@ -62,6 +62,10 @@ public class Controller {
             if(connectButton.getText().equals("Connetti")) {
                 socket = new Socket(SERVER_HOST, SERVER_PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
+                
+                JSONObject msgName = new JSONObject();
+                msgName.put("name", nameField.getText());
+                writer.println(msgName.toString());
 
                 receiveThread = new ReceiveThread(socket, chatArea);
                 receiveThread.start();
