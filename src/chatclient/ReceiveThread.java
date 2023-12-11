@@ -2,18 +2,25 @@ package chatclient;
 
 import java.io.*;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class ReceiveThread extends Thread {
     Socket socket = null;
     boolean close = false;
     TextArea chatArea;
     
-    public class Message {
-        private String msg;
-        public synchronized void setMsg(String m) {msg = m;}
-        public synchronized String getMsg() {return msg;}
+    public class MessageJson {
+        private String msgJson;
+        public synchronized void setMsgJson(String m) {msgJson = m;}
+        public synchronized String getMsgJson() {return msgJson;}
     }
     
     public ReceiveThread(Socket s, TextArea chat) {
@@ -29,20 +36,34 @@ public class ReceiveThread extends Thread {
     public void run() {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            final Message msg = new Message();
+            final MessageJson msgJson = new MessageJson();
             String message;
             while (!close && ((message = reader.readLine()) != null)) {
-                msg.setMsg(message);
+                msgJson.setMsgJson(message);
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
                         String chatText = chatArea.getText();
-                        chatText += msg.getMsg() + "\n";
+                        
+                        String json = msgJson.getMsgJson();
+                        JSONArray arr = new JSONArray(json);
+                        for(int i=0; i<arr.length(); i++) {
+                            JSONObject msg = arr.getJSONObject(i);
+                            chatText += LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))+ " \t" + msg.getString("name") + ": " + msg.getString("value")  + "\n";
+                        }
+                        
                         chatArea.setText(chatText);
                     }
                 });
             }
         } catch (IOException e) {
-            System.out.println("ERRORE: " + e.getMessage());
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    new Alert(Alert.AlertType.NONE, "Disconnesso!", ButtonType.OK).show();
+                }
+            });
+
+            System.out.println(e.getMessage());
         }
     }
 }

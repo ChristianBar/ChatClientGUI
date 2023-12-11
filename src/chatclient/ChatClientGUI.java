@@ -1,10 +1,12 @@
 package chatclient;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class ChatClientGUI extends Application {
 
@@ -18,9 +20,14 @@ public class ChatClientGUI extends Application {
         Parent root = loader.load();
         stage.setTitle("Chat Client GUI");
         stage.setScene(new Scene(root));
-        stage.setOnCloseRequest(event -> {
-            System.out.println("Stage is closing");
-        });
+        EventHandler<WindowEvent> event = new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                Controller c = loader.getController();
+                c.Quit();
+            }
+        };
+        stage.setOnCloseRequest(event);
         stage.show();
     }
 }

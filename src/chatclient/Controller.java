@@ -6,11 +6,12 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Controller {
     private static final String SERVER_HOST = "localhost";
@@ -27,6 +28,8 @@ public class Controller {
     @FXML
     private Button connectButton;
     @FXML
+    private Button clearButton;
+    @FXML
     private AnchorPane rightPane;
     @FXML
     private TextArea chatArea;
@@ -35,10 +38,14 @@ public class Controller {
 
     }
     
-    @FXML
-    public void exitApplication(ActionEvent event) {
-        Platform.exit();
-        System.out.print("asdsadasdds");
+    public void Quit() {
+        try {
+            if(receiveThread != null) receiveThread.Close();
+            if(socket != null) socket.close();
+            Platform.exit();
+        } catch (IOException ex) {
+            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void CheckName() {
@@ -50,34 +57,48 @@ public class Controller {
     
     public void Connect() {
         try {
-            if(connectButton.getText().equals("Connect")) {
+            if(connectButton.getText().equals("Connetti")) {
                 socket = new Socket(SERVER_HOST, SERVER_PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
 
                 receiveThread = new ReceiveThread(socket, chatArea);
                 receiveThread.start();
 
-                connectButton.setText("Disconnect");
+                connectButton.setText("Disconnetti");
+                clearButton.setDisable(false);
                 rightPane.setDisable(false);
                 nameField.setDisable(true);
+                
+                new Alert(Alert.AlertType.NONE, "Connesso!", ButtonType.OK).show();
             }
             else {
                 receiveThread.Close();
                 socket.close();
-                connectButton.setText("Connect");
+                connectButton.setText("Connetti");
+                clearButton.setDisable(true);
                 rightPane.setDisable(true);
                 nameField.setDisable(false);
                 inputField.setText("");
                 chatArea.setText("");
             }
         } catch (IOException ex) {
+            new Alert(Alert.AlertType.NONE, "Errore di connessione!", ButtonType.OK).show();
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    public void ClearChat() {
+        chatArea.setText("");
+    }
+    
     public void Send(KeyEvent ke) {
         if (ke.getCode().equals(KeyCode.ENTER)) {
-            writer.println(inputField.getText());
+            JSONObject msg = new JSONObject();
+            msg.put("name", nameField.getText());
+            msg.put("value", inputField.getText());
+            JSONArray msgs = new JSONArray();
+            msgs.put(msg);
+            writer.println(msgs.toString());
             inputField.setText("");
         }
     }
