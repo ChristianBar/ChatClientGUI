@@ -63,7 +63,7 @@ public class ReceiveThread extends Thread {
                             JSONObject msg = clients.getJSONObject(i);
                             usersString += msg.getString("name") + "\n";
                         }
-                        usersArea.setText(usersString);
+                        if(clients.length() > 0) usersArea.setText(usersString);
                     }
                 });
             }
