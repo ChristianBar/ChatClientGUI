@@ -6,7 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class ChatClient extends Application {
+public class ChatClientGUI extends Application {
 
     public static void main(String[] args) {
         launch(args);
@@ -16,7 +16,7 @@ public class ChatClient extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("chat_window.fxml"));
         Parent root = loader.load();
-        stage.setTitle("Chat Client");
+        stage.setTitle("Chat Client GUI");
         stage.setScene(new Scene(root));
         stage.setOnCloseRequest(event -> {
             System.out.println("Stage is closing");
