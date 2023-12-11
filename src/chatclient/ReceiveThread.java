@@ -2,7 +2,6 @@ package chatclient;
 
 import java.io.*;
 import java.net.Socket;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import javafx.application.Platform;
@@ -48,9 +47,9 @@ public class ReceiveThread extends Thread {
                         JSONArray arr = new JSONArray(json);
                         for(int i=0; i<arr.length(); i++) {
                             JSONObject msg = arr.getJSONObject(i);
-                            chatText = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) 
+                            chatText = msg.getString("date")
                                     + " \t" + msg.getString("name") 
-                                    + ": " + msg.getString("value")  + "\n"
+                                    + ": \t" + msg.getString("value")  + "\n"
                                     + chatText;
                         }
                         

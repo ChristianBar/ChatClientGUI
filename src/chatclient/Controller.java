@@ -3,6 +3,8 @@ package chatclient;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -96,6 +98,7 @@ public class Controller {
             JSONObject msg = new JSONObject();
             msg.put("name", nameField.getText());
             msg.put("value", inputField.getText());
+            msg.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
             JSONArray msgs = new JSONArray();
             msgs.put(msg);
             writer.println(msgs.toString());
