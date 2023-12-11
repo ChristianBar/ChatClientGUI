@@ -16,13 +16,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Controller {
-    private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 12345;
     
     private Socket socket;
     private PrintWriter writer;
     private ReceiveThread receiveThread;
 
+    @FXML
+    private TextField IPField;
     @FXML
     private TextField nameField;
     @FXML
@@ -53,7 +54,7 @@ public class Controller {
     }
     
     public void CheckName() {
-        if(nameField.getText().equals(""))
+        if(nameField.getText().equals("") || IPField.getText().equals(""))
             connectButton.setDisable(true);
         else
             connectButton.setDisable(false);
@@ -62,19 +63,21 @@ public class Controller {
     public void Connect() {
         try {
             if(connectButton.getText().equals("Connetti")) {
-                socket = new Socket(SERVER_HOST, SERVER_PORT);
+                socket = new Socket(IPField.getText(), SERVER_PORT);
                 writer = new PrintWriter(socket.getOutputStream(), true);
                 
                 receiveThread = new ReceiveThread(socket, chatArea, usersArea);
                 receiveThread.start();
                 
-                Send(nameField.getText() + " si è connesso");
+                // Manda un primo messaggio senza testo per farsi riconoscere e far applicare il nome al thread sul server che gestisce la connessione
+                Send("");
 
                 connectButton.setText("Disconnetti");
                 clearButton.setDisable(false);
                 usersArea.setDisable(false);
                 rightPane.setDisable(false);
                 nameField.setDisable(true);
+                IPField.setDisable(true);
                 
                 new Alert(Alert.AlertType.NONE, "Connesso!", ButtonType.OK).show();
             }
@@ -85,6 +88,7 @@ public class Controller {
                 clearButton.setDisable(true);
                 rightPane.setDisable(true);
                 nameField.setDisable(false);
+                IPField.setDisable(false);
                 usersArea.setDisable(true);
                 usersArea.setText("");
                 inputField.setText("");
