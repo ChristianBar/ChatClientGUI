@@ -48,7 +48,10 @@ public class ReceiveThread extends Thread {
                         JSONArray arr = new JSONArray(json);
                         for(int i=0; i<arr.length(); i++) {
                             JSONObject msg = arr.getJSONObject(i);
-                            chatText += LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))+ " \t" + msg.getString("name") + ": " + msg.getString("value")  + "\n";
+                            chatText = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) 
+                                    + " \t" + msg.getString("name") 
+                                    + ": " + msg.getString("value")  + "\n"
+                                    + chatText;
                         }
                         
                         chatArea.setText(chatText);
